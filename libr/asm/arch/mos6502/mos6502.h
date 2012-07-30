@@ -21,8 +21,11 @@ enum {
 	ZPG=11, ZPG_X=12, ZPG_Y=13//zeropage
 };
 
+static short oplen[] = {
+	1,1,3,3,3,2,3,2,2,2,2,2
+};
 //format strings for printing asm
-static char* asm_fmt[] = {
+static char* opfmt[] = {
 	"%s", // NONE 
 	"%s A", // Accum 
 	"%s $%4x", //ABS 
@@ -44,13 +47,31 @@ typedef struct {
 	int addr_mode;
 } opcode;
 
+//static NEVER CHANGES 
 typedef struct {
 	char name[4];
 	opcode opcodes[MOS6502_TOTAL_MODES]; //opcode
-	short addr_mode; //addresingmodeP
 	short modecnt;
 } typedef op;
 
+//every op found is stored here
+typedef struct {
+	op opData;
+	char str[16];
+	byte operands[2];
+	short operandCnt;
+	short mode;
+	int addr;
+} typedef disop;
+
+void disopCtor(byte* in,disop* newDisop);
+void disopDtor(disop* in);
+void getOpStr(disop* newDisop);
+void getOperands(disop* find, byte* code);
+short findMode(disop* find, byte* opcode);
+void prepOpHash(op opcodes[]);
+byte* nextop(byte* code,disop* lastop);
+disop* mos6502dis(long long addr,byte* in,int len);
 
 static op mos6502ops[]= {
 	{
